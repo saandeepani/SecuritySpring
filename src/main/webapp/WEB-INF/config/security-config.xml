@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context 
+		http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/security 
+		http://www.springframework.org/schema/security/spring-security.xsd">
+
+	<ldap-server ldif="classpath:users.ldif" />
+
+<!-- video@ spring security fundamentals-> spring security client integration Authorization demo
+	<http auto-config="true">
+		<intercept-url pattern="/login.html" access="IS_AUTHENTICATED_ANONYMOUSLY" requires-channel="https"/>requires-channel="https" forces to access through https
+		<intercept-url pattern="/loginFailed.html" access="IS_AUTHENTICATED_ANONYMOUSLY" />
+		<intercept-url pattern="/logout.html" access="IS_AUTHENTICATED_ANONYMOUSLY" />
+		<intercept-url pattern="/**" access="ROLE_USER" />
+		<form-login login-page="/login.html" authentication-failure-url="/loginFailed.html" />
+		<logout logout-success-url="/logout.html" />
+		<access-denied-handler error-page="/403.html" />
+		<http-basic />
+		it adds basic security to page
+	</http>
+ -->
+	<!-- Security setup using expressions -->
+	<http auto-config="true" use-expressions="true">
+		<intercept-url pattern="/login.html" access="permitAll" />
+		<intercept-url pattern="/loginFailed.html"
+			access="permitAll" />
+		<intercept-url pattern="/logout.html" access="permitAll" />
+		<intercept-url pattern="/403.html" access="permitAll" />
+		<intercept-url pattern="/**"
+			access="hasRole('ROLE_USER')" /> <!-- Syntax is important hasRole('ROLE_USER') -->
+		<!-- <intercept-url pattern="/**" access="hasRole('ROLE_USER') and hasRole()......" 
+			/> -->
+		<form-login login-page="/login.html"
+			authentication-failure-url="/loginFailed.html" />
+		<logout logout-success-url="/logout.html" />
+		<access-denied-handler error-page="/403.html" />
+	</http>
+
+	<!-- Static authentication setup -->
+	<!-- <authentication-manager> <authentication-provider> <user-service> <user 
+		name="sandeep" password="Sandeep" authorities="ROLE_USER" /> </user-service> 
+		</authentication-provider> </authentication-manager> -->
+	<!-- Static authentication setup -->
+
+
+	<!-- database authentication setup using LDAP -->
+	<authentication-manager>
+		<ldap-authentication-provider
+			group-search-filter="member={0}" group-search-base="ou=groups"
+			user-search-base="ou=people" user-search-filter="uid={0}" />
+	</authentication-manager>
+	<!-- database authentication setup using DB -->
+	<!-- <authentication-manager> <authentication-provider> <password-encoder 
+		hash="md5" /> md5 weak encryption. No salting <password-encoder hash="bcrypt" 
+		/> <jdbc-user-service data-source-ref="dataSource" /> </authentication-provider> 
+		</authentication-manager> -->
+
+	<!-- Data base connection -->
+	<beans:bean id="dataSource"
+		class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<beans:property name="driverClassName"
+			value="com.mysql.jdbc.Driver" />
+		<beans:property name="url"
+			value="jdbc:mysql://localhost:3306/SpringPiovtal" />
+		<beans:property name="username" value="root" />
+		<beans:property name="password" value="aarvi" />
+	</beans:bean>
+
+
+</beans:beans>
